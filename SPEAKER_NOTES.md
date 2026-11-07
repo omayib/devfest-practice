@@ -1,6 +1,24 @@
 # Speaker notes: Lyria Camera (45 min)
 
-## Branches
+## Two repos
+
+| Repo | Who gets it | Contents |
+|---|---|---|
+| [lyria-workshop-starter](https://github.com/omayib/lyria-workshop-starter) | Attendees, before the workshop | Starter code with TODOs, one commit, no answers, no speaker notes |
+| [devfest-practice](https://github.com/omayib/devfest-practice) (this repo) | You; URL shown on screen when someone is stuck | Starter on `main` plus a branch per step |
+
+Catch-up for attendees (show this slide when needed):
+
+```bash
+git stash
+git remote add solution https://github.com/omayib/devfest-practice.git
+git fetch solution
+git checkout solution/step-1        # or step-2, step-3, bonus-crossfade
+```
+
+If you change the starter code, change it in both repos (or re-export `main` here into the starter).
+
+## Branches (this repo)
 
 | Branch | State | Diff to show on screen |
 |---|---|---|
@@ -32,8 +50,7 @@ system-prompt experiments. That's the part people remember.
       `v1alpha` still works and isn't region-blocked at the venue.
 - [ ] Check rate limits: how many concurrent Lyria sessions a free-tier key allows.
 - [ ] Test `serve.py` on Windows and macOS (or ask a volunteer to).
-- [ ] Push the repo to GitHub, and send attendees the
-      "Before the workshop" section.
+- [ ] Send attendees the starter repo link and its "Before the workshop" section.
 - [ ] Record a 60-second screen capture of the app as a fallback if the API or Wi-Fi fails.
 
 ## On the day
