@@ -12,10 +12,14 @@ const snapshot = document.querySelector<HTMLImageElement>("#snapshot")!;
 const toggle = document.querySelector<HTMLButtonElement>("#toggle")!;
 const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
 const promptList = document.querySelector<HTMLUListElement>("#prompts")!;
+const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
+const countdownSeconds = document.querySelector<HTMLElement>("#countdown-seconds")!;
+const countdownFill = document.querySelector<HTMLDivElement>("#countdown-fill")!;
 
 const music = new LyriaMusic();
 let running = false;
 let loopTimer: number | undefined;
+let countdownTimer: number | undefined;
 
 // ---------------------------------------------------------------------------
 // The core flow
@@ -24,6 +28,7 @@ let loopTimer: number | undefined;
 /** Snapshot → Gemini → prompts on screen. */
 async function captureAndGetPrompts(): Promise<string[]> {
   const frame = captureFrame(video);
+  if (loopTimer !== undefined) startCountdown(); // the loop just fired, restart the clock
   snapshot.src = `data:${IMAGE_MIME_TYPE};base64,${frame}`;
   snapshot.hidden = false;
 
@@ -45,6 +50,7 @@ async function start() {
     await music.start(prompts);
     setStatus(`Playing. New snapshot every ${CAPTURE_INTERVAL_MS / 1000}s.`);
     startLoop();
+    if (loopTimer !== undefined) startCountdown(); // only once step 3 is done
   } catch (e) {
     showError(e);
     stop(false);
@@ -70,6 +76,8 @@ function startLoop() {
 function stop(resetStatus = true) {
   running = false;
   window.clearInterval(loopTimer);
+  loopTimer = undefined;
+  stopCountdown();
   music.stop();
   toggle.textContent = "▶ Start";
   if (resetStatus) setStatus("Stopped.");
@@ -91,6 +99,25 @@ function showError(e: unknown) {
   } else {
     setStatus(`⚠️ ${e instanceof Error ? e.message : String(e)}`, "error");
   }
+}
+
+/** Shows "Next snapshot in Ns" counting down to the next loop tick. */
+function startCountdown() {
+  stopCountdown();
+  const deadline = performance.now() + CAPTURE_INTERVAL_MS;
+  const tick = () => {
+    const remaining = Math.max(0, deadline - performance.now());
+    countdownSeconds.textContent = String(Math.ceil(remaining / 1000));
+    countdownFill.style.width = `${(remaining / CAPTURE_INTERVAL_MS) * 100}%`;
+  };
+  tick();
+  countdownEl.hidden = false;
+  countdownTimer = window.setInterval(tick, 250);
+}
+
+function stopCountdown() {
+  window.clearInterval(countdownTimer);
+  countdownEl.hidden = true;
 }
 
 function renderPrompts(prompts: string[]) {

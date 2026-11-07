@@ -113,6 +113,31 @@ button:disabled {
   color: var(--error);
 }
 
+#countdown {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+#countdown strong {
+  color: var(--text);
+}
+
+#countdown .bar {
+  margin-top: 6px;
+  height: 4px;
+  border-radius: 999px;
+  background: #262a33;
+  overflow: hidden;
+}
+
+#countdown-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transition: width 0.25s linear;
+}
+
 #prompts {
   list-style: none;
   padding: 0;
