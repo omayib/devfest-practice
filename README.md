@@ -5,7 +5,7 @@ asks **Gemini** what the scene sounds like, and streams live, evolving music fro
 **Lyria RealTime** that follows whatever you point it at.
 
 ```
-camera frame ──▶ Gemini 2.5 Flash-Lite ──▶ ["warm lo-fi piano", "rainy window", ...]
+camera frame ──▶ Gemini 3.5 Flash-Lite ──▶ ["warm lo-fi piano", "rainy window", ...]
                                                        │
                      🔊 speakers ◀── audio chunks ◀── Lyria RealTime (setWeightedPrompts)
                                                        ▲

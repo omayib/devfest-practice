@@ -5,7 +5,7 @@
 export const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
 /** Fast, cheap multimodal model that turns a camera frame into music prompts. */
-export const VISION_MODEL = "gemini-2.5-flash-lite";
+export const VISION_MODEL = "gemini-3.5-flash-lite";
 
 /** Lyria RealTime: streams music continuously and can be steered with prompts. */
 export const MUSIC_MODEL = "models/lyria-realtime-exp";
