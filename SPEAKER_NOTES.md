@@ -56,4 +56,4 @@ system-prompt experiments. That's the part people remember.
 - Lit components and styles (~1,300 lines) → plain HTML/TS (~150 lines).
 - Screen share, camera switching, mirroring, interval presets, splash screen.
 - Crossfade moved to the bonus branch.
-- Filtered-prompt UI, separate countdown widget, custom error classes.
+- Filtered-prompt UI (Lyria still filters prompts; we just don't display it).
