@@ -32,7 +32,7 @@ system-prompt experiments. That's the part people remember.
       `v1alpha` still works and isn't region-blocked at the venue.
 - [ ] Check rate limits: how many concurrent Lyria sessions a free-tier key allows.
 - [ ] Test `serve.py` on Windows and macOS (or ask a volunteer to).
-- [ ] Push the repo to GitHub, replace `<REPO_URL>` in README.md, and send attendees the
+- [ ] Push the repo to GitHub, and send attendees the
       "Before the workshop" section.
 - [ ] Record a 60-second screen capture of the app as a fallback if the API or Wi-Fi fails.
 

@@ -20,7 +20,7 @@ No npm, no build step. Just plain HTML + JavaScript.
 2. Get a Gemini API key at <https://aistudio.google.com/apikey>.
 3. Clone and start the local server:
    ```bash
-   git clone <REPO_URL> lyria-workshop
+   git clone https://github.com/omayib/devfest-practice.git lyria-workshop
    cd lyria-workshop
    python3 serve.py        # Windows: py serve.py
    ```
