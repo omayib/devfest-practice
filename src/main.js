@@ -2,7 +2,7 @@
  * Wires the UI together. You only touch this file in step 3.
  */
 import { API_KEY, clearApiKey, saveApiKey } from "./api_key.js";
-import { CAPTURE_INTERVAL_MS } from "./config.js";
+import { CAPTURE_INTERVAL_MS, CROSSFADE_SECONDS } from "./config.js";
 import { captureFrame, IMAGE_MIME_TYPE, startCamera } from "./camera.js";
 import { imageToMusicPrompts } from "./gemini.js";
 import { LyriaMusic } from "./music.js";
@@ -65,7 +65,7 @@ function startLoop() {
   loopTimer = setInterval(async () => {
     try {
       const prompts = await captureAndGetPrompts();
-      await music.setPrompts(prompts);
+      await music.crossfadeTo(prompts, CROSSFADE_SECONDS);
     } catch (e) {
       showError(e); // keep looping, the next snapshot may work
     }

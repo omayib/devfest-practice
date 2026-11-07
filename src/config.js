@@ -11,6 +11,9 @@ export const MUSIC_MODEL = "models/lyria-realtime-exp";
 /** How often we take a new snapshot and steer the music (milliseconds). */
 export const CAPTURE_INTERVAL_MS = 20_000;
 
+/** How long old prompts take to fade out while new ones fade in (seconds). */
+export const CROSSFADE_SECONDS = 6;
+
 /**
  * The instruction Gemini gets alongside each camera frame.
  * Step 3: make this your own!
