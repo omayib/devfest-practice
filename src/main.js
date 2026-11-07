@@ -62,15 +62,14 @@ async function start() {
 
 /** Keeps the music following the camera. */
 function startLoop() {
-  // TODO(step 3): Every CAPTURE_INTERVAL_MS, take a new snapshot and steer the music:
-  //
-  //   loopTimer = setInterval(async () => {
-  //     const prompts = await captureAndGetPrompts();
-  //     await music.setPrompts(prompts);
-  //   }, CAPTURE_INTERVAL_MS);
-  //
-  // Wrap the body in try/catch and pass errors to showError(), so one failed
-  // request doesn't kill the loop.
+  loopTimer = setInterval(async () => {
+    try {
+      const prompts = await captureAndGetPrompts();
+      await music.setPrompts(prompts);
+    } catch (e) {
+      showError(e); // keep looping, the next snapshot may work
+    }
+  }, CAPTURE_INTERVAL_MS);
 }
 
 function stop(resetStatus = true) {
