@@ -12,17 +12,17 @@ const SAMPLE_RATE = 48_000;
 const BUFFER_SECONDS = 2;
 
 export class AudioPlayer {
-  private readonly ctx = new AudioContext({ sampleRate: SAMPLE_RATE });
-  private output = this.createOutput();
-  private nextStartTime = 0;
+  ctx = new AudioContext({ sampleRate: SAMPLE_RATE });
+  output = this.createOutput();
+  nextStartTime = 0;
 
   /** Browsers only allow audio after a user gesture, so call this from a click. */
-  async resume(): Promise<void> {
+  async resume() {
     await this.ctx.resume();
   }
 
   /** Queue one base64 PCM chunk for playback. */
-  enqueue(base64Pcm: string): void {
+  enqueue(base64Pcm) {
     const buffer = this.decode(base64Pcm);
     const source = this.ctx.createBufferSource();
     source.buffer = buffer;
@@ -37,7 +37,7 @@ export class AudioPlayer {
   }
 
   /** Fade out whatever is queued and reset. */
-  stop(): void {
+  stop() {
     const now = this.ctx.currentTime;
     this.output.gain.setValueAtTime(this.output.gain.value, now);
     this.output.gain.linearRampToValueAtTime(0, now + 0.5);
@@ -45,13 +45,13 @@ export class AudioPlayer {
     this.nextStartTime = 0;
   }
 
-  private createOutput(): GainNode {
+  createOutput() {
     const gain = this.ctx.createGain();
     gain.connect(this.ctx.destination);
     return gain;
   }
 
-  private decode(base64Pcm: string): AudioBuffer {
+  decode(base64Pcm) {
     const binary = atob(base64Pcm);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);

@@ -2,8 +2,6 @@
  * Everything you might want to tweak lives here.
  */
 
-export const API_KEY = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
-
 /** Fast, cheap multimodal model that turns a camera frame into music prompts. */
 export const VISION_MODEL = "gemini-3.5-flash-lite";
 

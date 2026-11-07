@@ -1,28 +1,32 @@
 /**
  * Wires the UI together. You only touch this file in step 3.
  */
-import { API_KEY, CAPTURE_INTERVAL_MS } from "./config";
-import { captureFrame, IMAGE_MIME_TYPE, startCamera } from "./camera";
-import { imageToMusicPrompts } from "./gemini";
-import { LyriaMusic } from "./music";
+import { API_KEY, clearApiKey, saveApiKey } from "./api_key.js";
+import { CAPTURE_INTERVAL_MS } from "./config.js";
+import { captureFrame, IMAGE_MIME_TYPE, startCamera } from "./camera.js";
+import { imageToMusicPrompts } from "./gemini.js";
+import { LyriaMusic } from "./music.js";
 
-const video = document.querySelector<HTMLVideoElement>("#camera")!;
-const snapshot = document.querySelector<HTMLImageElement>("#snapshot")!;
-const toggle = document.querySelector<HTMLButtonElement>("#toggle")!;
-const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
-const promptList = document.querySelector<HTMLUListElement>("#prompts")!;
+const video = document.querySelector("#camera");
+const snapshot = document.querySelector("#snapshot");
+const toggle = document.querySelector("#toggle");
+const statusEl = document.querySelector("#status");
+const promptList = document.querySelector("#prompts");
+const keyForm = document.querySelector("#key-form");
+const keyInput = document.querySelector("#key-input");
+const changeKey = document.querySelector("#change-key");
 
 const music = new LyriaMusic();
 let running = false;
-let loopTimer: number | undefined;
-let countdownTimer: number | undefined;
+let loopTimer;
+let countdownTimer;
 
 // ---------------------------------------------------------------------------
 // The core flow
 // ---------------------------------------------------------------------------
 
 /** Snapshot → Gemini → prompts on screen. */
-async function captureAndGetPrompts(): Promise<string[]> {
+async function captureAndGetPrompts() {
   const capturedAt = performance.now();
   const frame = captureFrame(video);
   snapshot.src = `data:${IMAGE_MIME_TYPE};base64,${frame}`;
@@ -60,7 +64,7 @@ async function start() {
 function startLoop() {
   // TODO(step 3): Every CAPTURE_INTERVAL_MS, take a new snapshot and steer the music:
   //
-  //   loopTimer = window.setInterval(async () => {
+  //   loopTimer = setInterval(async () => {
   //     const prompts = await captureAndGetPrompts();
   //     await music.setPrompts(prompts);
   //   }, CAPTURE_INTERVAL_MS);
@@ -71,7 +75,7 @@ function startLoop() {
 
 function stop(resetStatus = true) {
   running = false;
-  window.clearInterval(loopTimer);
+  clearInterval(loopTimer);
   loopTimer = undefined;
   stopCountdown();
   music.stop();
@@ -83,12 +87,12 @@ function stop(resetStatus = true) {
 // UI helpers (nothing to do here)
 // ---------------------------------------------------------------------------
 
-function setStatus(text: string, kind: "" | "todo" | "error" = "") {
+function setStatus(text, kind = "") {
   statusEl.textContent = text;
   statusEl.className = kind;
 }
 
-function showError(e: unknown) {
+function showError(e) {
   console.error(e);
   stopCountdown(); // keep the message visible until the next snapshot
   const message = e instanceof Error ? e.message : String(e);
@@ -104,14 +108,14 @@ function startCountdown(from = performance.now()) {
     setStatus(`Playing · next snapshot in ${Math.max(0, seconds)}s`);
   };
   tick();
-  countdownTimer = window.setInterval(tick, 250);
+  countdownTimer = setInterval(tick, 250);
 }
 
 function stopCountdown() {
-  window.clearInterval(countdownTimer);
+  clearInterval(countdownTimer);
 }
 
-function renderPrompts(prompts: string[]) {
+function renderPrompts(prompts) {
   promptList.replaceChildren(
     ...prompts.map((text) => {
       const li = document.createElement("li");
@@ -128,16 +132,24 @@ music.onError = (message) => {
 
 toggle.addEventListener("click", () => (running ? stop() : start()));
 
-(async () => {
-  if (!API_KEY) {
-    setStatus("Missing API key: copy .env.example to .env.local, add your key, restart npm run dev.", "error");
-    toggle.disabled = true;
-    return;
-  }
-  try {
-    await startCamera(video);
-    setStatus("Ready. Press Start.");
-  } catch (e) {
-    setStatus(`Camera unavailable: ${(e as Error).message}`, "error");
-  }
-})();
+keyForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  saveApiKey(keyInput.value.trim());
+  location.reload();
+});
+
+changeKey.addEventListener("click", () => {
+  clearApiKey();
+  location.reload();
+});
+
+if (!API_KEY) {
+  keyForm.hidden = false;
+  toggle.hidden = true;
+  setStatus("Paste your Gemini API key to begin.");
+} else {
+  changeKey.hidden = false;
+  startCamera(video)
+    .then(() => setStatus("Ready. Press Start."))
+    .catch((e) => setStatus(`Camera unavailable: ${e.message}`, "error"));
+}

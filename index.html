@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lyria Camera Workshop</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="src/style.css" />
+    <!-- Lets our code write `import ... from "@google/genai"` with no npm install. -->
+    <script type="importmap">
+      { "imports": { "@google/genai": "https://cdn.jsdelivr.net/npm/@google/genai@3.0.0/+esm" } }
+    </script>
   </head>
   <body>
     <main>
@@ -17,13 +21,22 @@
         <h1>Lyria Camera</h1>
         <p class="subtitle">Point your camera at something and listen.</p>
 
+        <form id="key-form" hidden>
+          <label for="key-input">Gemini API key</label>
+          <input id="key-input" type="password" placeholder="AIza…" autocomplete="off" required />
+          <button type="submit">Save key</button>
+          <small>Get one at aistudio.google.com/apikey. It's saved only in this browser.</small>
+        </form>
+
         <button id="toggle" type="button">▶ Start</button>
         <p id="status" role="status">Starting camera…</p>
 
         <h2>Current prompts</h2>
         <ul id="prompts"></ul>
+
+        <button id="change-key" class="link" type="button" hidden>Change API key</button>
       </section>
     </main>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="src/main.js"></script>
   </body>
 </html>
