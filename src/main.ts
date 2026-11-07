@@ -5,16 +5,12 @@ import { API_KEY, CAPTURE_INTERVAL_MS } from "./config";
 import { captureFrame, IMAGE_MIME_TYPE, startCamera } from "./camera";
 import { imageToMusicPrompts } from "./gemini";
 import { LyriaMusic } from "./music";
-import { TodoError } from "./todo";
 
 const video = document.querySelector<HTMLVideoElement>("#camera")!;
 const snapshot = document.querySelector<HTMLImageElement>("#snapshot")!;
 const toggle = document.querySelector<HTMLButtonElement>("#toggle")!;
 const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
 const promptList = document.querySelector<HTMLUListElement>("#prompts")!;
-const countdownEl = document.querySelector<HTMLDivElement>("#countdown")!;
-const countdownSeconds = document.querySelector<HTMLElement>("#countdown-seconds")!;
-const countdownFill = document.querySelector<HTMLDivElement>("#countdown-fill")!;
 
 const music = new LyriaMusic();
 let running = false;
@@ -27,15 +23,17 @@ let countdownTimer: number | undefined;
 
 /** Snapshot → Gemini → prompts on screen. */
 async function captureAndGetPrompts(): Promise<string[]> {
+  const capturedAt = performance.now();
   const frame = captureFrame(video);
-  if (loopTimer !== undefined) startCountdown(); // the loop just fired, restart the clock
   snapshot.src = `data:${IMAGE_MIME_TYPE};base64,${frame}`;
   snapshot.hidden = false;
 
+  stopCountdown();
   setStatus("Asking Gemini what this looks like as music…");
   const prompts = await imageToMusicPrompts(frame);
   console.log("[gemini] prompts", prompts);
   renderPrompts(prompts);
+  if (loopTimer !== undefined) startCountdown(capturedAt);
   return prompts;
 }
 
@@ -44,11 +42,9 @@ async function start() {
   toggle.disabled = true;
   try {
     const prompts = await captureAndGetPrompts();
-    if (!running) return;
-
     setStatus("Connecting to Lyria RealTime…");
     await music.start(prompts);
-    setStatus(`Playing. New snapshot every ${CAPTURE_INTERVAL_MS / 1000}s.`);
+    setStatus("Playing.");
     startLoop();
     if (loopTimer !== undefined) startCountdown(); // only once step 3 is done
   } catch (e) {
@@ -94,30 +90,25 @@ function setStatus(text: string, kind: "" | "todo" | "error" = "") {
 
 function showError(e: unknown) {
   console.error(e);
-  if (e instanceof TodoError) {
-    setStatus(`🛠️ ${e.message}`, "todo");
-  } else {
-    setStatus(`⚠️ ${e instanceof Error ? e.message : String(e)}`, "error");
-  }
+  stopCountdown(); // keep the message visible until the next snapshot
+  const message = e instanceof Error ? e.message : String(e);
+  if (message.startsWith("TODO")) setStatus(`🛠️ ${message}`, "todo");
+  else setStatus(`⚠️ ${message}`, "error");
 }
 
-/** Shows "Next snapshot in Ns" counting down to the next loop tick. */
-function startCountdown() {
+/** Status reads "Playing · next snapshot in 14s", counting down to the next loop tick. */
+function startCountdown(from = performance.now()) {
   stopCountdown();
-  const deadline = performance.now() + CAPTURE_INTERVAL_MS;
   const tick = () => {
-    const remaining = Math.max(0, deadline - performance.now());
-    countdownSeconds.textContent = String(Math.ceil(remaining / 1000));
-    countdownFill.style.width = `${(remaining / CAPTURE_INTERVAL_MS) * 100}%`;
+    const seconds = Math.ceil((from + CAPTURE_INTERVAL_MS - performance.now()) / 1000);
+    setStatus(`Playing · next snapshot in ${Math.max(0, seconds)}s`);
   };
   tick();
-  countdownEl.hidden = false;
   countdownTimer = window.setInterval(tick, 250);
 }
 
 function stopCountdown() {
   window.clearInterval(countdownTimer);
-  countdownEl.hidden = true;
 }
 
 function renderPrompts(prompts: string[]) {
@@ -130,12 +121,6 @@ function renderPrompts(prompts: string[]) {
   );
 }
 
-music.onFilteredPrompt = (text, reason) => {
-  for (const li of promptList.children) {
-    if (li.textContent === text) li.classList.add("filtered");
-  }
-  setStatus(`Lyria skipped "${text}": ${reason}`, "error");
-};
 music.onError = (message) => {
   showError(new Error(message));
   stop(false);

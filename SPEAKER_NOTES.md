@@ -46,8 +46,8 @@ system-prompt experiments. That's the part people remember.
     the camera.
   - **Prompts appear but there's no sound**: check the tab isn't muted, then check the console
     for a WebSocket error (key or region).
-  - **"Lyria skipped …"**: the prompt was filtered (e.g. a real artist name). Expected behaviour,
-    and a good teaching moment.
+  - **Music ignores one prompt**: Lyria silently drops prompts it filters (e.g. a real artist
+    name). Expected behaviour, and a good teaching moment if someone's system prompt names a band.
 
 ## What was removed from the original AI Studio sample, and why
 
@@ -56,3 +56,4 @@ system-prompt experiments. That's the part people remember.
 - Lit components and styles (~1,300 lines) → plain HTML/TS (~150 lines).
 - Screen share, camera switching, mirroring, interval presets, splash screen.
 - Crossfade moved to the bonus branch.
+- Filtered-prompt UI, separate countdown widget, custom error classes.

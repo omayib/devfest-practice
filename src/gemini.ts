@@ -4,7 +4,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { API_KEY, SYSTEM_PROMPT, VISION_MODEL } from "./config";
 import { IMAGE_MIME_TYPE } from "./camera";
-import { TodoError } from "./todo";
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
@@ -24,5 +23,5 @@ export async function imageToMusicPrompts(base64Image: string): Promise<string[]
   //             (use the `Type` enum: Type.OBJECT, Type.ARRAY, Type.STRING).
   //
   // Then JSON.parse(response.text) and return the `prompts` array.
-  throw new TodoError("Step 1: implement imageToMusicPrompts() in src/gemini.ts");
+  throw new Error("TODO Step 1: implement imageToMusicPrompts() in src/gemini.ts");
 }
