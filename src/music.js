@@ -20,32 +20,32 @@ export class LyriaMusic {
   async start(prompts) {
     await this.player.resume();
 
-    // TODO(step 2a): Connect and keep the session:
-    //
-    //   this.session = await ai.live.music.connect({
-    //     model: MUSIC_MODEL,
-    //     callbacks: {
-    //       onmessage: (message) => this.handleMessage(message),
-    //       onerror: ...  (call this.onError)
-    //       onclose: ...  (a console.log is fine)
-    //     },
-    //   });
-    //
-    // TODO(step 2b): Send the prompts (implement setPrompts below).
-    // TODO(step 2c): Start the stream with this.session.play().
-    throw new Error("TODO Step 2: implement LyriaMusic.start() in src/music.js");
+    this.session = await ai.live.music.connect({
+      model: MUSIC_MODEL,
+      callbacks: {
+        onmessage: (message) => this.handleMessage(message),
+        onerror: () => this.onError("Lost connection to Lyria RealTime."),
+        onclose: () => console.log("[lyria] stream closed"),
+      },
+    });
+
+    await this.setPrompts(prompts);
+    this.session.play();
   }
 
   /** Steer the music. Lyria blends all prompts, weighted by `weight`. */
   async setPrompts(prompts) {
-    // TODO(step 2b): Call this.session.setWeightedPrompts({ weightedPrompts })
-    //   where weightedPrompts looks like [{ text: "warm lo-fi piano", weight: 1.0 }, ...]
-    throw new Error("TODO Step 2: implement LyriaMusic.setPrompts() in src/music.js");
+    await this.session?.setWeightedPrompts({
+      weightedPrompts: prompts.map((text) => ({ text, weight: 1.0 })),
+    });
   }
 
   handleMessage(message) {
-    // TODO(step 2a): Audio arrives in message.serverContent?.audioChunks.
-    //   Pass each chunk's `.data` (base64 PCM) to this.player.enqueue(...).
+    if (!this.session) return; // ignore chunks still in flight after stop()
+
+    for (const chunk of message.serverContent?.audioChunks ?? []) {
+      if (chunk.data) this.player.enqueue(chunk.data);
+    }
   }
 
   stop() {
